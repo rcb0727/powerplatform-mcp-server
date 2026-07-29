@@ -1,25 +1,66 @@
-# Power Automate MCP Server
+# Power Platform MCP Server
 
-[![CI](https://github.com/rcb0727/powerplatform-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rcb0727/powerplatform-mcp/actions/workflows/ci.yml)
-
-**Docs:** **Overview** · [Installation & Upgrading](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md) · [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) · [Report an issue](https://github.com/rcb0727/powerplatform-mcp-server/issues)
-
-An MCP (Model Context Protocol) server for Microsoft Power Platform — **216 tools** spanning Power Automate flows, SharePoint, Excel, Dataverse/Dynamics 365, Power Apps, Power Pages, and tenant administration. Build, run, diagnose, and govern automations in natural language.
+**216 tools for Microsoft Power Platform, authenticated by the Azure CLI — no app registration, no admin consent, no token cache.** Build, run, diagnose, and govern Power Automate flows, Dataverse, SharePoint, Power Apps, Power Pages, RPA, and tenant administration in natural language.
 
 Works with any MCP-compatible AI client: **Claude Desktop**, **Claude Code**, **VS Code Copilot**, **Cursor**, **Google Gemini CLI**, and more.
 
-## Documentation Map
+```bash
+npm install -g powerplatform-mcp-server   # 1. install
+powerplatform-mcp-server --setup          # 2. sign in + connect your AI app
+powerplatform-mcp-server --doctor         # 3. confirm everything works
+```
 
-| Page | What you'll find |
+| Where to go | What's there |
 |------|------------------|
-| **README** (this page) | [Features](#features) · [Quick Start](#quick-start) · [Authentication](#authentication-azure-cli) · [CLI Reference](#cli-reference) · [Usage Examples](#usage-examples) · [All 188 Tools](#available-tools-188-total) · [Security](#security) · [Architecture](#architecture) |
-| [Installation Guide](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md) | [Choose your path](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#choose-your-path) · [Easy Path](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#easy-path-3-steps) · [Fast Path](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#fast-path-developers) · [Connect your AI app](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#connecting-your-ai-app) · [**Updating**](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating) · [Troubleshooting](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#troubleshooting) · [Glossary](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#glossary) · [Admin & enterprise](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#admin--enterprise-setup) |
-| [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) | Release history with per-version upgrade notes |
-| [Issues](https://github.com/rcb0727/powerplatform-mcp-server/issues) | Bug reports and feature requests — every one gets read |
+| **This page** | [Quick start](#quick-start) · [Authentication](#authentication-azure-cli) · [What it can do](#what-it-can-do) · [Security](#security) · [Architecture](#architecture) |
+| [**All 216 tools**](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/TOOLS.md) | The full reference, grouped, with every tool's description |
+| [**Examples**](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/EXAMPLES.md) | Real prompts to try, by area |
+| [**Install guide**](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md) | Step-by-step setup, updating, CLI reference, reducing approval prompts, troubleshooting |
+| [**Changelog**](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) | Release history |
+| [**Privacy**](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/PRIVACY.md) | Collects nothing; data flows only to Microsoft under your account |
+| [**Issues**](https://github.com/rcb0727/powerplatform-mcp-server/issues) | Bug reports and feature requests — every one gets read |
 
-## Features
+## Quick Start
 
-**216 tools, 22 groups — everything at a glance** (full list with descriptions: [Available Tools](#available-tools-188-total)):
+The three commands at the top of this page are the whole install. The `--setup` wizard does it all: checks the Azure CLI (running `az login` if needed), picks your environment, **and wires the server into your AI app for you** — no hand-editing JSON. It ends by verifying the whole chain (config, Azure CLI session, live API) before declaring success. Then restart your app and ask it to build a flow.
+
+Signed out later (expired token, MFA policy change)? `powerplatform-mcp-server --login` re-authenticates without re-running the wizard — or just ask your AI assistant to run the **`sign_in`** tool and finish the sign-in from chat, no terminal needed.
+
+**Not very technical?** Follow the step-by-step **[Easy Path](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#easy-path-3-steps)** with checkpoints.
+
+| Want to… | Do this |
+|----------|---------|
+| Connect a specific app during setup | `powerplatform-mcp-server --setup --client claude` |
+| Connect an app later (or a second one) | `powerplatform-mcp-server --client cursor` |
+| Skip the global install | `npx -y powerplatform-mcp-server@latest --setup` (add `--npx` so your app uses npx too) |
+| Configure your app by hand | [Manual client configs](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#connect-your-ai-app-manually) |
+
+Supported apps: **Claude Desktop**, **Claude Code**, **Cursor**, **VS Code (Copilot)**, **Gemini CLI**, **Windsurf**, **ChatGPT** (via `--http`).
+
+---
+
+## Authentication (Azure CLI)
+
+This server authenticates entirely through the **Azure CLI** — there is no Microsoft Entra app registration, no admin consent URL, and no token cache owned by this server. Tokens come from `az account get-access-token`, riding the CLI's own signed-in session.
+
+### What you need
+
+| Requirement | How |
+|------|--------|
+| Azure CLI installed | macOS: `brew install azure-cli` · Windows: `winget install Microsoft.AzureCLI` · Linux: [aka.ms/azure-cli](https://aka.ms/azure-cli) |
+| A signed-in session | `az login` (the setup wizard runs it for you if needed) |
+
+That's the entire auth story. If a tool ever reports missing credentials, the fix is `az login` — or ask your AI assistant to run the `sign_in` tool, which relays az's device-code sign-in into the chat.
+
+### Notes for admins
+
+- **Identity**: every call runs as the signed-in user, under the Azure CLI's first-party Microsoft client. Nothing new appears in your app registrations.
+- **Consent**: most tenants already permit the Azure CLI. If yours restricts it, the block appears in Entra sign-in logs against *Microsoft Azure CLI* (Enterprise applications), and Conditional Access policies apply to it like any other client.
+- **Revocation**: `az logout`, session revocation, or disabling the user works immediately — there is no separate grant to clean up.
+
+## What it can do
+
+**216 tools, 22 groups — everything at a glance** (full list with descriptions: [TOOLS.md](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/TOOLS.md)):
 
 <!-- TOOLS-GRID:BEGIN — generated by `npm run docs:tools`, do not edit by hand -->
 | | | |
@@ -47,681 +88,41 @@ Beyond the tool count:
 - **Everything annotated** — all 216 tools declare read-only/destructive hints, so AI hosts can apply the right guardrails
 - **Cross-platform** — Windows, macOS, and Linux
 
-## Quick Start
-
-Three commands — run them in a terminal:
-
-```bash
-npm install -g powerplatform-mcp-server   # 1. install
-powerplatform-mcp-server --setup          # 2. sign in + connect your AI app
-powerplatform-mcp-server --doctor         # 3. confirm everything works
-```
-
-The `--setup` wizard does it all: checks the Azure CLI (running `az login` if needed), picks your environment, **and wires the server into your AI app for you** — no hand-editing JSON. It ends by verifying the whole chain (config, Azure CLI session, live API) before declaring success. Then restart your app and ask it to build a flow.
-
-Signed out later (expired token, MFA policy change)? `powerplatform-mcp-server --login` re-authenticates without re-running the wizard — or just ask your AI assistant to run the **`sign_in`** tool and finish the sign-in from chat, no terminal needed.
-
-**Not very technical?** Follow the step-by-step **[Easy Path](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#easy-path-3-steps)** with checkpoints.
-
-| Want to… | Do this |
-|----------|---------|
-| Connect a specific app during setup | `powerplatform-mcp-server --setup --client claude` |
-| Connect an app later (or a second one) | `powerplatform-mcp-server --client cursor` |
-| Skip the global install | `npx -y powerplatform-mcp-server@latest --setup` (add `--npx` so your app uses npx too) |
-| Configure your app by hand | [Manual client configs](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#connect-your-ai-app-manually) |
-
-Supported apps: **Claude Desktop**, **Claude Code**, **Cursor**, **VS Code (Copilot)**, **Gemini CLI**, **Windsurf**, **ChatGPT** (via `--http`).
-
----
-
-## Authentication (Azure CLI)
-
-This fork authenticates entirely through the **Azure CLI** — there is no Microsoft Entra app registration, no admin consent URL, and no token cache owned by this server. Tokens come from `az account get-access-token`, riding the CLI's own signed-in session.
-
-### What you need
-
-| Requirement | How |
-|------|--------|
-| Azure CLI installed | macOS: `brew install azure-cli` · Windows: `winget install Microsoft.AzureCLI` · Linux: [aka.ms/azure-cli](https://aka.ms/azure-cli) |
-| A signed-in session | `az login` (the setup wizard runs it for you if needed) |
-
-That's the entire auth story. If a tool ever reports missing credentials, the fix is `az login` — or ask your AI assistant to run the `sign_in` tool, which relays az's device-code sign-in into the chat.
-
-### Notes for admins
-
-- **Identity**: every call runs as the signed-in user, under the Azure CLI's first-party Microsoft client. Nothing new appears in your app registrations.
-- **Consent**: most tenants already permit the Azure CLI. If yours restricts it, the block appears in Entra sign-in logs against *Microsoft Azure CLI* (Enterprise applications), and Conditional Access policies apply to it like any other client.
-- **Revocation**: `az logout`, session revocation, or disabling the user works immediately — there is no separate grant to clean up.
-
-
-## Reducing approval prompts
-
-216 tools means a lot of permission prompts if you approve each one. The
-annotations this server ships let you allow the safe ones and keep the gate
-where it matters — **100 tools are read-only, 39 are destructive, 77 are
-ordinary writes.**
-
-Allow the reads, keep prompts for everything that changes state:
-
-```jsonc
-// .claude/settings.json
-{
-  "permissions": {
-    "allow": [
-      "mcp__powerautomate__list_flows",
-      "mcp__powerautomate__get_flow",
-      "mcp__powerautomate__get_runs",
-      "mcp__powerautomate__diagnose_flow",
-      "mcp__powerautomate__query_dataverse_rows",
-      "mcp__powerautomate__list_connections",
-      "mcp__powerautomate__test_connection"
-    ]
-  }
-}
-```
-
-Add whichever other `list_*` / `get_*` / `search_*` / `diagnose_*` tools you use
-often — every one of them is annotated `readOnlyHint: true` and cannot change
-anything.
-
-Allowing the whole server (`"mcp__powerautomate"`) also works, but it
-auto-approves `delete_flow`, `reset_environment`, and 37 other irreversible
-operations. Don't, unless you are working in a throwaway environment.
-
-## CLI Reference
-
-```
-powerplatform-mcp-server [options]
-```
-
-| Flag | Description |
-|------|-------------|
-| `--setup`, `-s` | Run the interactive setup wizard (signs in + connects your AI app) |
-| `--login` | Sign in again using your existing setup — no wizard (expired tokens, MFA/policy changes) |
-| `--doctor` | Check your setup and print exactly what to fix, then exit |
-| `--validate` | Verify config, auth, and API connectivity then exit |
-| `--client <name>` | Wire an AI app's config to this server, then exit (`claude`, `claude-code`, `codex`/`chatgpt`, `cursor`, `vscode`, `gemini`, `windsurf`) |
-| `--npx` | With `--setup`/`--client`, configure the app to run via `npx` (no global install) |
-| `--update` | Check for updates and install the latest version |
-| `--version`, `-v` | Print version and exit |
-| `--http` | Start with Streamable HTTP transport |
-| `--port <N>` | Port for HTTP transport (default: 3000) |
-| `--env <name>` | Override the default environment (alias or GUID) |
-| `--config <path>` | Use an alternate config file |
-| `--debug` | Enable debug-level logging |
-| `--help`, `-h` | Show help message |
-
-**Environment Variables:**
-| Variable | Description |
-|----------|-------------|
-| `PA_MCP_TENANT_ID` | Microsoft Entra tenant ID or domain (overrides config file) |
-| `PA_MCP_ENVIRONMENT_ID` | Power Platform environment ID (bootstraps a full config when no config.json exists — lets a host application supply configuration without a config file) |
-| `PA_MCP_ENVIRONMENT_REGION` | Azure region for the bootstrapped environment (default `unitedstates`) |
-| `PA_MCP_ENVIRONMENT_NAME` | Display name for the bootstrapped environment |
-| `PA_MCP_DATAVERSE_URL` | Optional Dataverse org URL for the bootstrapped environment |
-| `PA_CONFIG_PATH` | Custom path to config.json |
-| `PA_MCP_HTTP_TOKEN` | With `--http`: require `Authorization: Bearer <token>` on every MCP request |
-| `PA_MCP_SECURE_STORAGE_TIMEOUT_MS` | Timeout for keychain/DPAPI access before failing loudly (default 15000) |
-
----
-
-## Usage Examples
-
-### Flows
-```
-Create a flow that sends me an email every morning with the weather forecast
-```
-```
-Test my "Daily Report" flow and tell me if there are any errors
-```
-```
-Help me write an expression to format a date as "January 1, 2024"
-```
-```
-Show me all the flows that have been shared with me
-```
-```
-Patch the "Compose" action inside the Default case of "If_Recognized_Form" — only that one node, leave the rest alone
-```
-
-### SharePoint
-```
-List all items in the "Projects" list on our Marketing site
-```
-```
-Upload this month's report to the Shared Documents library
-```
-
-### Dataverse
-```
-Show me all active accounts in Dataverse with revenue over $1M
-```
-```
-Create a new contact row for John Smith in the contacts table
-```
-
-### Power Apps
-```
-List all canvas apps in my environment and who owns them
-```
-```
-Share the "Expense Tracker" app with the Finance team
-```
-```
-Connect to this Power Apps Studio URL, sync its source, and add a responsive dashboard screen
-```
-
-#### Canvas source authoring preview
-
-Canvas source authoring uses Microsoft's official prerelease Canvas Authoring MCP as an isolated child process. Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), open an existing blank or editable canvas app in Power Apps Studio, enable **Settings → Updates → Coauthoring**, and keep that Studio tab open. Then call `connect_canvas_authoring` with the Studio Designer URL before using discovery, sync, or compile tools.
-
-The AI assistant creates or edits `App.pa.yaml` and one `.pa.yaml` file per screen, using live control/API/data-source metadata and `compile_canvas_source` for supported validation and live synchronization. Compilation changes the open draft, so it requires `confirm=true`. `sync_canvas_source` can overwrite local source and also requires confirmation. The preview does **not** provision the initial cloud app shell, add Studio data connections, save, or publish; those remain Power Apps Studio steps. See Microsoft's [external-tools preview guide](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/create-canvas-external-tools) and [Power Apps YAML reference](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/power-apps-yaml).
-
-### Administration (requires Power Platform Admin, Dynamics 365 Admin, or Global Admin)
-```
-Create a new sandbox environment called "Dev Testing"
-```
-```
-What DLP policies are applied to my default environment?
-```
-```
-Export the "Sales Solution" as a managed solution for deployment
-```
-
-### Connectors & Expressions
-```
-What connectors are available for working with SharePoint?
-```
-```
-What parameters does the "Send an email (V2)" action need?
-```
-
-> **Desktop flows are operated here, not authored here.** Microsoft exposes no
-> API for creating or editing a desktop flow's definition — it is Robin script
-> with companion binary records, and their own recovery guidance is to paste it
-> into the Power Automate for desktop designer by hand. Author in the designer;
-> use these tools to run, monitor, diagnose, and orchestrate. Moving an
-> authored flow between environments is supported via `export_solution` /
-> `import_solution`.
-
-<!-- TOOLS-TABLE:BEGIN — generated by `npm run docs:tools`, do not edit by hand -->
-## Available Tools (216 total)
-
-> Every tool the server exposes, grouped by service. All 216 are listed here.
-
-<details>
-<summary><strong>Setup & Authentication</strong> (1 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `sign_in` | Sign in to Microsoft Power Platform when other tools report missing credentials. Starts the Azure CLI's device-code sign-in and returns a code plus a microsoft.com link for the user to complete in their own browser (MFA included) — no terminal needed. Call sign_in again after the user says they've finished to confirm. This tool only displays the code; it never asks for or accepts passwords. |
-
-</details>
-
-<details>
-<summary><strong>Core Flow Operations</strong> (15 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_flows` | List Power Automate flows in an environment. Returns flow names, IDs, state (Started/Stopped), last modified dates, and owners. Use scope='shared' to find flows shared with you, scope='owned' for your flows only. Use this to discover what flows exist before getting details or making changes. |
-| `get_flow` | Get the complete definition of a Power Automate flow including triggers, actions, connection references, and description. Use list_flows first to find flow IDs. Set format='json' or format='both' to capture the FULL definition including nested actions inside Switch/If/Foreach/Scope (the default 'summary' format only shows top-level actions). |
-| `create_flow` | Create a new Power Automate flow. Provide a trigger, actions, and connection references. Use search_connectors and get_action_schema to understand the required parameters for connector actions. The flow is created enabled (Started); use toggle_flow to stop it. |
-| `update_flow` | Update an existing Power Automate flow. Three update modes: (1) full replace — pass 'actions' to replace all top-level actions (default; you must include nested actions you want kept), (2) merge — set mergeActions=true to deep-merge only the actions you provide, leaving the rest intact, (3) patch — use patchActions with path keys (e.g. 'If/cases/Default/actions/Compose') for surgical edits with the smallest payload. Use get_flow with format='json' first to see the full nested action tree. |
-| `preview_update` | Preview exactly what update_flow would change on a flow — display name, trigger, added/removed/modified actions, and connection references — without writing anything. Run this before update_flow on flows that matter. |
-| `delete_flow` | Delete a Power Automate flow permanently. This action cannot be undone. You must set confirm=true to proceed with deletion. Use get_flow first to verify you have the correct flow. |
-| `toggle_flow` | Enable or disable a Power Automate flow. Use 'start' to enable a stopped flow or 'stop' to disable a running flow. The flow must exist and you must have permission to modify it. |
-| `clone_flow` | Clone an existing Power Automate flow to create a copy with a new name. Optionally update connection references in the clone. The cloned flow will be created in a stopped state. |
-| `export_flow` | Export a flow as a package. Returns the flow definition and metadata that can be used to import into another environment or as a backup. |
-| `share_flow` | Share a flow with users, groups, or service principals. Grant them either 'CanEdit' (can modify the flow) or 'CanView' (run-only access) permissions. You need the Microsoft Entra object ID of the principal to share with. |
-| `get_flow_permissions` | Get the list of users, groups, and service principals that have access to a flow. Shows their role (Owner, CanEdit, CanView) and identity information. Use this to audit who can see or modify a flow. |
-| `list_flow_versions` | List all versions of a flow. Each version represents a saved state of the flow definition. Use this to track changes or restore to a previous version. |
-| `get_flow_version` | Read one saved version of a flow, including its full definition — inspect what a flow looked like before a change, or check a version before restoring it. |
-| `restore_flow_version` | Roll a flow back to a previous saved version — the undo for a bad edit. Previews the change unless confirm=true. The current definition is itself saved as a version first, so a restore can be undone. |
-| `get_trigger_inputs` | Get the trigger payload a past run actually fired with — the real inputs, not a hand-written guess. Feed it back through test_flow to reproduce a failure against the data that caused it. |
-
-</details>
-
-<details>
-<summary><strong>Testing & Debugging</strong> (10 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `test_flow` | Test a Power Automate flow with guided feedback. This tool: 1. Gets the flow's expected input schema (if any) 2. Runs the flow with provided test data 3. Waits for completion 4. Reports success or provides diagnosis for failures Use this after creating or modifying a flow to verify it works correctly. |
-| `run_flow` | Trigger a Power Automate flow to run immediately. Works with any trigger type (manual, scheduled, event-based). Optionally pass input data and wait for the run to complete. |
-| `get_runs` | Get the execution history of a Power Automate flow. Shows run times, status (Succeeded/Failed/Running), and error information for failed runs. Useful for debugging flow issues. |
-| `get_run_actions` | Get detailed action-level information for a flow run. Shows each action's status, timing, inputs/outputs, and error details. Use 'failedOnly: true' to focus on failures, 'actionName' to drill into a specific action, 'includeInputs'/'includeOutputs' to see full data payloads. |
-| `get_run_action_repetitions` | Get iteration-level details for a for_each or do_until loop action in a flow run. Shows which iterations succeeded/failed, their inputs/outputs, and error details. Essential for debugging loops that partially fail. |
-| `diagnose_flow` | Diagnose issues with a Power Automate flow. Analyzes recent runs, identifies failures, and provides specific fixes. Use this when a flow fails or behaves unexpectedly. |
-| `validate_flow` | Validate a Power Automate flow definition for errors. Can validate either an existing flow by ID or a new definition. Checks for schema errors, expression syntax, circular dependencies, and missing connection references. |
-| `resubmit_run` | Resubmit a failed or cancelled flow run. This will re-execute the flow with the same trigger inputs. Only works for flows with manual triggers. |
-| `cancel_run` | Cancel a currently running flow execution. Use this to stop a flow that is taking too long or running incorrectly. |
-| `cancel_all_runs` | Cancel every in-flight run of a flow (Running, Waiting, Paused, Suspended). Without confirm=true it previews which runs would be cancelled. Cancelled runs cannot be resumed. |
-
-</details>
-
-<details>
-<summary><strong>Planning & Help</strong> (5 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `plan_flow` | Interactive flow planning wizard. Call this FIRST when user wants to create or build a flow. IMPORTANT: This tool returns clarifying questions that you MUST present to the user before proceeding. Do NOT skip the questions or make assumptions. Workflow: 1. Call plan_flow with the user's description 2. Present ALL questions to the user (don't answer them yourself) 3. Collect user's answers 4. Call plan_flow again with answers to get the final plan 5. Use create_flow or build_flow with the resulting definition Questions cover: trigger timing, recipients, data sources, formatting preferences, etc. |
-| `build_flow` | Build a Power Automate flow from a description. RECOMMENDED: Use plan_flow FIRST to gather requirements through the interactive wizard, then use this tool to create the flow. This tool: 1. Analyzes the goal 2. Detects required connections 3. Creates the flow directly Missing connections do NOT block creation: the flow is built anyway (stopped, so it can't fail-run), and the response lists exactly which connections still need to be configured at make.powerautomate.com. Connections that already exist are used automatically. For complex flows with multiple data sources, approvals, or specific timing requirements, use plan_flow first to clarify details. |
-| `get_expression_help` | Get help with Power Automate expressions. Provides: - Common functions reference by category - Context-specific examples - Expression syntax validation - Best practices and tips Use when building flow actions that need expressions. |
-| `search_connectors` | Search for Power Automate connectors by name, description, or category. Returns matching connectors with their tier (Standard/Premium) and capabilities. Use this to discover available connectors before building flows. |
-| `get_action_schema` | Get the schema and parameters for a connector's actions/triggers. Use search_connectors first to find connector IDs. Without operationId, returns a list of all available operations. With operationId, returns detailed parameter and response schemas. |
-
-</details>
-
-<details>
-<summary><strong>Connections & Custom Connectors</strong> (13 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_connections` | List all connections in an environment. Shows connection names, statuses (Connected/Error), connector types, and who created them. Use this to troubleshoot connection issues or see what services are connected. |
-| `ensure_connection` | Get a working connection for a connector in one call: returns an existing Connected one if there is any, otherwise creates one and hands back sign-in instructions. Use this instead of stitching list/create/test together — it is the right first step before binding a connector into a flow. |
-| `create_connection` | Create a connection for a connector. OAuth connectors (SharePoint, Office 365, Teams…) are created unauthenticated and come back with sign-in instructions — a direct consent link where the environment offers one, otherwise a deep link to the connection in the maker portal — then test_connection confirms. API-key style connectors accept their values via parameters. |
-| `test_connection` | Check whether a connection is healthy (Connected) and surface its error state when it isn't — use after create_connection consent, or when a flow fails with connection/auth errors. |
-| `fix_connection` | Repair a broken or expired connection: returns re-authentication instructions — a fresh consent link where the environment offers one, otherwise a deep link to the connection in the maker portal. No-op with confirmation when the connection is already healthy. |
-| `delete_connection` | Permanently delete a connection. Flows bound to it will fail until re-bound. Requires confirm=true. |
-| `list_custom_connectors` | List all custom connectors in the environment. Shows connector names, IDs, and operation counts. |
-| `get_custom_connector` | Get detailed information about a custom connector including its OpenAPI definition and all operations. |
-| `create_custom_connector` | Create a custom connector for any REST API. Define the base URL, authentication, and operations. Each operation specifies an HTTP method, path, and parameters. |
-| `update_custom_connector` | Update a custom connector. Add or remove operations, or change the display name and description. |
-| `delete_custom_connector` | Delete a custom connector. Requires confirm=true to proceed. |
-| `plan_custom_connector` | Get guidance on creating a custom connector. Describes what information you need to gather about your API. |
-| `import_openapi_connector` | Create a custom connector by importing an OpenAPI/Swagger specification. Provide the full spec and authentication details. |
-
-</details>
-
-<details>
-<summary><strong>Approvals</strong> (3 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_approvals` | List pending approvals in the environment. Shows approval requests that are waiting for a response. |
-| `list_approvals_dataverse` | List pending approval requests from Dataverse. More reliable than the Flow API for approvals. Shows approval title, stage, and requester. |
-| `respond_approval` | Respond to a pending approval request. Use 'Approve' to approve or 'Reject' to reject the request. |
-
-</details>
-
-<details>
-<summary><strong>Dataverse CRUD</strong> (7 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_dataverse_tables` | List Dataverse tables (entities) in the environment. Returns table names, entity set names, and whether they are custom or system tables. Use the EntitySetName in row operations. |
-| `get_dataverse_table` | Get detailed metadata for a Dataverse table including all column definitions. Provide the table's logical name (e.g., 'account', 'contact'). Returns column names, types, and requirements. |
-| `query_dataverse_rows` | Query rows from a Dataverse table with OData filtering, selecting, and ordering. Use list_dataverse_tables first to get the EntitySetName. Returns matching rows with their field values. |
-| `get_dataverse_row` | Get a single Dataverse row by its ID. Returns all fields or selected fields for the specified row. |
-| `create_dataverse_row` | Create a new row in a Dataverse table. Use get_dataverse_table first to see available columns and required fields. Returns the created row with its new ID. |
-| `update_dataverse_row` | Update an existing Dataverse row. Only include fields you want to change. The row must exist. |
-| `delete_dataverse_row` | Delete a Dataverse row permanently. This action cannot be undone. You must set confirm=true to proceed with deletion. |
-
-</details>
-
-<details>
-<summary><strong>SharePoint</strong> (11 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `search_sharepoint_sites` | Search for SharePoint sites by name or keyword. Returns site IDs, names, and URLs. Use the site ID in subsequent SharePoint operations. |
-| `get_sharepoint_site` | Get a SharePoint site by its ID or by hostname and path. Returns site details including name, URL, and description. |
-| `list_sharepoint_lists` | List all lists and libraries in a SharePoint site. Returns list IDs, names, and types. Use the list ID for item operations. |
-| `get_sharepoint_list_columns` | Get column definitions for a SharePoint list. Shows column names, types, and whether they are required. Use this before creating or updating items. |
-| `list_sharepoint_items` | Get items from a SharePoint list with optional filtering and sorting. Returns item IDs, field values, and metadata. |
-| `create_sharepoint_item` | Create a new item in a SharePoint list. Use get_sharepoint_list_columns first to see available fields. Provide field values as key-value pairs. |
-| `update_sharepoint_item` | Update an existing SharePoint list item. Only include fields you want to change. |
-| `delete_sharepoint_item` | Delete a SharePoint list item permanently. This action cannot be undone. You must set confirm=true to proceed. |
-| `list_sharepoint_files` | List files in a SharePoint document library. Use list_sharepoint_lists first to find document libraries, then use list_sharepoint_lists with the site ID to get drive IDs via the library's driveType. |
-| `upload_sharepoint_file` | Upload a file to a SharePoint document library. Simple upload supports files up to 4MB. Provide the file content as a base64-encoded string. |
-| `get_sharepoint_file_content` | Download a file's content from a SharePoint document library. Returns base64-encoded content for text files under 1MB, metadata-only for larger or binary files. |
-
-</details>
-
-<details>
-<summary><strong>Excel (OneDrive)</strong> (2 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `search_excel_files` | Search for Excel files in OneDrive by name. Returns matching files with their IDs and paths. |
-| `inspect_excel_file` | Inspect an Excel file to find tables and columns. Use search_excel_files first to find the file ID. |
-
-</details>
-
-<details>
-<summary><strong>Power Apps</strong> (12 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_powerapps` | List Power Apps canvas apps in an environment. Returns app names, IDs, owners, and last modified dates. |
-| `list_canvas_apps` | List Power Apps canvas apps stored in Dataverse. Shows app names, versions, and status. |
-| `get_powerapp` | Get detailed information about a Power App including owner, connections, and app URIs. |
-| `publish_powerapp` | Publish a Power App to make the latest version available to users. |
-| `get_powerapp_versions` | Get version history for a Power App. Shows all saved versions with dates. |
-| `restore_powerapp_version` | Restore a Power App to a previous version. |
-| `get_powerapp_permissions` | Get the list of users, groups, and service principals that have access to a Power App. |
-| `share_powerapp` | Share a Power App with a user, group, or service principal. Grant CanEdit or CanView permissions. |
-| `unshare_powerapp` | Remove a user or group's access to a Power App. |
-| `set_powerapp_owner` | Transfer ownership of a Power App to another user. Requires Power Platform admin role. |
-| `set_powerapp_display_name` | Change the display name of a Power App. |
-| `delete_powerapp` | Delete a Power App permanently. This action cannot be undone. Set confirm=true to proceed. |
-
-</details>
-
-<details>
-<summary><strong>Canvas App Authoring (Preview)</strong> (13 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `connect_canvas_authoring` | Connect the preview Canvas authoring service to an existing app whose Power Apps Studio tab is open with coauthoring enabled. Accepts either a trusted Designer URL or explicit app/environment IDs and environment category. Device-code auth is not supported through this bridge. |
-| `list_canvas_controls` | List controls supported by the connected Canvas authoring session. |
-| `describe_canvas_control` | Describe one Canvas control and its authoring properties. |
-| `list_canvas_apis` | List connector APIs visible to the connected Canvas authoring session. |
-| `describe_canvas_api` | Describe one connector API visible to the connected Canvas app. |
-| `list_canvas_data_sources` | List data sources already present in the connected Canvas app. |
-| `get_canvas_data_source_schema` | Get the schema of a data source already present in the connected Canvas app. |
-| `sync_canvas_source` | Sync the connected live Canvas app into an existing local source directory. This can overwrite local files and requires confirmOverwrite=true. |
-| `compile_canvas_source` | Compile the local .pa.yaml workspace into the connected live Canvas app. This is a destructive tenant write even when validation fails and requires confirm=true. |
-| `list_canvas_source_files` | List safe .pa.yaml files in an existing local Canvas source directory, including size and SHA-256. |
-| `read_canvas_source_file` | Read one safe UTF-8 .pa.yaml file (maximum 1 MiB) and return its content, size, and SHA-256. |
-| `write_canvas_source_file` | Create one safe UTF-8 .pa.yaml file (maximum 1 MiB). Existing files are preserved unless overwrite=true; expectedSha256 can prevent lost updates. |
-| `delete_canvas_source_file` | Delete one safe local .pa.yaml file. Requires confirm=true; expectedSha256 can prevent deleting a changed file. |
-
-</details>
-
-<details>
-<summary><strong>Model-driven Apps</strong> (13 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_model_driven_apps` | List published or unpublished model-driven Power Apps from Dataverse, including AppModule IDs and unique names. |
-| `get_model_driven_app` | Get a model-driven app's published or unpublished AppModule record. Optionally includes the complete descriptor/app graph/config XML definition. |
-| `create_model_driven_app` | Create a real model-driven AppModule in Dataverse. This creates the app shell; add components, validate, publish, and grant security roles with the companion tools. |
-| `update_model_driven_app` | Update supported properties on a published model-driven AppModule, creating unpublished changes. A newly-created app must be published once before its properties can be updated through the documented AppModule API. |
-| `delete_model_driven_app` | Permanently delete a model-driven AppModule. Requires confirm=true. |
-| `get_model_driven_app_components` | Retrieve all components currently included in a published model-driven app. |
-| `add_model_driven_app_components` | Add Dataverse components such as views, forms, workflows, dashboards, and sitemaps to a model-driven app through AddAppComponents. |
-| `remove_model_driven_app_components` | Remove one or more Dataverse components from a model-driven app through RemoveAppComponents. |
-| `validate_model_driven_app` | Run Dataverse ValidateApp and return dependency errors and warnings before publishing. |
-| `publish_model_driven_app` | Validate and publish one model-driven app via PublishXml. Validation blocks publishing unless skipValidation=true. |
-| `list_model_driven_app_roles` | List Dataverse security roles associated with a model-driven app. |
-| `grant_model_driven_app_role` | Associate a Dataverse security role with a model-driven app to grant access. |
-| `revoke_model_driven_app_role` | Disassociate a Dataverse security role from a model-driven app. |
-
-</details>
-
-<details>
-<summary><strong>Power Apps Administration</strong> (4 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_powerapps_admin` | List all Power Apps in an environment as admin. Requires Power Platform admin role. |
-| `get_powerapp_admin` | Get Power App details as admin. Requires Power Platform admin role. |
-| `delete_powerapp_admin` | Delete a Power App as admin. Requires Power Platform admin role. Set confirm=true to proceed. |
-| `quarantine_powerapp` | Quarantine or unquarantine a Power App. Quarantined apps cannot be launched. Requires admin role. |
-
-</details>
-
-<details>
-<summary><strong>Power Pages — Site Configuration</strong> (9 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_powerpages_sites` | List Power Pages sites as stored in Dataverse (the configuration plane). Returns enhanced-model sites (mspp_websites) and standard-model sites (adx_websites), each tagged with its data model and the site id to pass to the component tools. For hosting/status/URL use list_powerpages_websites instead. |
-| `get_powerpages_site` | Get a Power Pages site's Dataverse record and detected data model (standard vs enhanced) by its site id (from list_powerpages_sites). |
-| `list_powerpages_components` | List configuration components of a Power Pages site across the standard and enhanced data models. Directly site-scoped types are restricted to siteId automatically. Nested types (weblink, form metadata/steps, columnpermission) require an explicit parent OData filter. |
-| `get_powerpages_component` | Get a single Power Pages configuration component row by its record id. siteId selects the data model. |
-| `create_powerpages_component` | Create a Power Pages configuration component. Directly site-scoped types receive the website @odata.bind automatically. Nested types require their parent @odata.bind in data. Use upload_powerpages_webfile_content for standard-model web-file bytes. |
-| `update_powerpages_component` | Update a Power Pages configuration component row. Only include columns you want to change in `data`. |
-| `delete_powerpages_component` | Delete a Power Pages configuration component row permanently. Set confirm=true to proceed. |
-| `manage_powerpages_relationship` | Associate or disassociate a Power Pages security/configuration record with a web role using a documented Dataverse relationship. Both records are verified to belong to siteId. Set confirm=true because these relationships affect authorization. |
-| `upload_powerpages_webfile_content` | Attach local file bytes to a standard-model Power Pages web-file record using the documented newest-note attachment format. Reads an absolute regular local path (max 15 MiB); does not place base64 in the MCP request. Enhanced virtual-table sites must use pac_pages_upload. Set confirm=true. |
-
-</details>
-
-<details>
-<summary><strong>Power Pages — Site Management</strong> (36 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_powerpages_websites` | List Power Pages websites in an environment via the Power Platform management API. Returns hosting info: status, public URL, data model, and type (production/trial). For the Dataverse config behind a site use list_powerpages_sites. |
-| `get_powerpages_website` | Get a Power Pages website's hosting details (status, URL, data model) by id, via the management API. |
-| `create_powerpages_website` | Provision a new Power Pages website (management API). Asynchronous — returns a tracking URL; provisioning takes several minutes. The Dataverse org id is resolved from the environment if not supplied. Set confirm=true to proceed. |
-| `delete_powerpages_website` | Delete a Power Pages website (management API). This cannot be undone. Set confirm=true to proceed. |
-| `restart_powerpages_website` | Restart a Power Pages website (management API). Recycles the site so it picks up Dataverse config changes — the programmatic equivalent of the studio 'Sync'. Synchronous. |
-| `get_powerpages_operation_status` | Get or boundedly wait for a Power Pages Operation-Location result. Only authenticated HTTPS URLs on api.powerplatform.com are accepted. |
-| `get_powerpages_allowed_ip_addresses` | Get the website IP allow list. |
-| `add_powerpages_allowed_ip_addresses` | Add IPv4/IPv6 addresses or CIDR ranges to the website allow list. Set confirm=true. |
-| `remove_powerpages_allowed_ip_addresses` | Remove IPv4/IPv6 addresses or CIDR ranges from the website allow list. Set confirm=true. |
-| `list_powerpages_custom_domains` | List custom domains configured for a website. |
-| `create_powerpages_custom_domain` | Add a custom domain to a website. DNS validation still applies. Set confirm=true. |
-| `delete_powerpages_custom_domain` | Remove a custom domain from a website. Set confirm=true. |
-| `list_powerpages_certificates` | List SSL or managed certificates for a website. |
-| `upload_powerpages_certificate` | Upload a local PFX certificate using multipart form data. Reads an absolute canonical path (max 16 MiB); password may come from a named environment variable. Set confirm=true. |
-| `delete_powerpages_certificate` | Delete a certificate by thumbprint and type. Set confirm=true. |
-| `list_powerpages_ssl_bindings` | List SSL bindings for a custom hostname. |
-| `add_powerpages_ssl_binding` | Bind a certificate thumbprint to a custom hostname. Set confirm=true. |
-| `delete_powerpages_ssl_binding` | Delete an SSL binding by hostname and thumbprint. Set confirm=true. |
-| `get_powerpages_waf_status` | Get the website web application firewall status. |
-| `get_powerpages_waf_rules` | Get managed and custom web application firewall rules. |
-| `enable_powerpages_waf` | Enable the website web application firewall. Set confirm=true. |
-| `disable_powerpages_waf` | Disable the website web application firewall. Set confirm=true. |
-| `create_powerpages_waf_rules` | Create or update managed/custom WAF rules using the published 2024-10-01 contract. Set confirm=true. |
-| `delete_powerpages_waf_custom_rules` | Delete named custom WAF rules. Set confirm=true. |
-| `start_powerpages_quick_scan` | Start a quick website security scan. Set confirm=true. |
-| `start_powerpages_deep_scan` | Start a deep website security scan. Set confirm=true. |
-| `get_powerpages_security_scan_report` | Get the latest completed deep security-scan report. |
-| `get_powerpages_security_scan_score` | Get the latest deep security-scan score. |
-| `start_powerpages_website` | Start a stopped Power Pages website. Set confirm=true. |
-| `stop_powerpages_website` | Stop a Power Pages website and make it unavailable. Set confirm=true. |
-| `convert_powerpages_trial_to_production` | Convert a trial website to production and optionally enable CDN/WAF. Licensing implications apply. Set confirm=true. |
-| `enable_powerpages_bootstrap_v5` | Stamp Bootstrap 5 enabled for a website. Set confirm=true. |
-| `set_powerpages_data_model_version` | Set whether the website uses the enhanced data model. Set confirm=true. |
-| `toggle_powerpages_afd_routing` | Enable or disable Azure Front Door traffic routing. Set confirm=true. |
-| `update_powerpages_security_group` | Set or clear the Entra security group controlling private-site visibility. Set confirm=true. |
-| `update_powerpages_site_visibility` | Set website visibility to public or private. Set confirm=true. |
-
-</details>
-
-<details>
-<summary><strong>Power Pages — PAC CLI</strong> (8 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `pac_pages_bootstrap_migrate` | Migrate downloaded website HTML from Bootstrap 3 to Bootstrap 5 in place. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_clone` | Clone local Power Pages website content into a new output directory. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_download` | Download a standard or enhanced Power Pages site from Dataverse. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_download_code_site` | Download a Power Pages code site from Dataverse. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_list` | List websites from the current or specified PAC Dataverse environment. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_migrate_datamodel` | Start, inspect, reset, or revert a Power Pages data-model migration. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_upload` | Upload downloaded website configuration to Dataverse. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-| `pac_pages_upload_code_site` | Upload compiled code to a Power Pages code site. Runs the installed pac executable without a shell and uses the active PAC authentication profile. |
-
-</details>
-
-<details>
-<summary><strong>Environment Administration</strong> (10 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_environments` | List all Power Platform environments accessible to the current user. Shows environment names, IDs, regions, and whether each is the default environment. |
-| `get_environment` | Get detailed information about a Power Platform environment including Dataverse URL, region, and SKU. |
-| `create_environment` | Create a new Power Platform environment. Requires admin role. |
-| `delete_environment` | Delete a Power Platform environment permanently. This action cannot be undone. Set confirm=true. |
-| `copy_environment` | Copy a Power Platform environment to create a new one. Set confirm=true. |
-| `reset_environment` | Reset a Power Platform environment to its initial state. THIS DELETES ALL DATA. Set confirm=true. |
-| `backup_environment` | Create a backup of a Power Platform environment. |
-| `restore_environment` | Restore a Power Platform environment from a backup. Set confirm=true. |
-| `list_environment_backups` | List available backups for a Power Platform environment. |
-| `get_environment_capacity` | Get capacity consumption for a specific environment. |
-
-</details>
-
-<details>
-<summary><strong>DLP Policies</strong> (6 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_dlp_policies` | List all Data Loss Prevention (DLP) policies in the tenant. Requires admin role. |
-| `get_dlp_policy` | Get details of a DLP policy including connector group assignments. |
-| `create_dlp_policy` | Create a new DLP policy. Requires admin role. |
-| `update_dlp_policy` | Update an existing DLP policy. Requires admin role. |
-| `delete_dlp_policy` | Delete a DLP policy. Set confirm=true to proceed. Requires admin role. |
-| `get_dlp_connector_configs` | Get connector-level configurations for a DLP policy (endpoint filtering, etc.). |
-
-</details>
-
-<details>
-<summary><strong>Solutions ALM</strong> (8 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_solutions` | List Dataverse solutions in the environment. Solutions are containers for flows, apps, and other components. Use this to see what's deployed and manage solution-aware components. |
-| `export_solution` | Export a Dataverse solution as a base64-encoded zip, or resume an earlier asynchronous export by export job ID. Supports synchronous export and bounded system-job polling. |
-| `import_solution` | Import a base64-encoded Dataverse solution zip. This changes the environment and requires confirm=true. Supports asynchronous import and system-job polling. |
-| `clone_solution` | Clone an unmanaged Dataverse solution and consolidate its patches into a new version. |
-| `add_solution_component` | Add an existing component to an unmanaged Dataverse solution. |
-| `remove_solution_component` | Remove a component from an unmanaged Dataverse solution. Requires confirm=true. |
-| `list_solution_flows` | List flows stored in Dataverse solutions. These are 'solution-aware' flows that can be exported and deployed across environments. Includes version history access. |
-| `publish_all_customizations` | Publish every pending Dataverse customization. This can affect live apps and requires confirm=true. |
-
-</details>
-
-<details>
-<summary><strong>Managed Environments & Capacity</strong> (6 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `enable_managed_environment` | Enable managed environment features. Set confirm=true. Requires admin role. |
-| `disable_managed_environment` | Disable managed environment features. Set confirm=true. Requires admin role. |
-| `get_managed_environment_settings` | Get the governance configuration for a managed environment. |
-| `update_managed_environment_settings` | Update governance settings for a managed environment. Requires admin role. |
-| `get_tenant_capacity` | Get storage and API capacity usage for the tenant. Requires admin role. |
-| `get_api_request_summary` | Get API request consumption summary for the tenant. Requires admin role. |
-
-</details>
-
-<details>
-<summary><strong>Desktop Flows / RPA</strong> (13 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_desktop_flows` | List desktop flows (RPA/UI automation built with Power Automate for desktop) in the environment, with the workflow IDs used to run them. |
-| `get_desktop_flow` | Get a desktop flow's details plus its declared input and output variables (schema) — check this before run_desktop_flow to know what inputs to pass. |
-| `run_desktop_flow` | Trigger a desktop flow (RPA) run on a registered machine via a desktop-flows connection. Attended runs need a signed-in user at the machine; unattended runs need a Process license on the machine. Returns a session ID to poll with get_desktop_flow_run. Limit: 70 runs/minute per connection. |
-| `get_desktop_flow_runs` | List recent desktop flow runs (newest first) — across all desktop flows or scoped to one — with status, timing, and error summaries. |
-| `get_desktop_flow_run` | Get one desktop flow run's status. Returns outputs when the run succeeded, and full error details (code, message, machine) when it failed. |
-| `cancel_desktop_flow_run` | Cancel a queued or running desktop flow run. Needs owner-level access to the run — runs you triggered qualify. |
-| `list_desktop_flow_connections` | Find desktop-flows connection references usable as run_desktop_flow's connectionName (with isConnectionReference: true). Explains how to create/locate a connection when none exist. |
-| `get_desktop_flow_run_logs` | Get a desktop flow run's action-level logs. Tries the V2 log store (flowlog) first, then the V1 run context; says plainly when the run has no action-level logs (common for API-triggered runs — V2 logging is documented for connector-triggered runs). |
-| `diagnose_desktop_flow_run` | Diagnose a desktop flow run: decodes the failure, checks the machine it ran on (status, heartbeat), translates licensing errors into the exact license to request, and pulls the log tail when available. |
-| `list_machines` | List registered desktop-flow (RPA) machines with live status, last heartbeat, capacity, hosting type, and group membership. |
-| `get_machine` | Get one desktop-flow machine's full detail: status, heartbeat, session capacity, agent version, hosted-machine errors, and group-key health. |
-| `list_machine_groups` | List desktop-flow machine groups (load balancing / high availability for unattended RPA runs) with type, member count, and provisioning state. |
-| `restart_hosted_machine` | Restart a Microsoft-hosted RPA machine (interrupts any in-flight run on it). Only works on hosted machines — physical machines must be restarted at the OS. |
-
-</details>
-
-<details>
-<summary><strong>Work Queues (RPA orchestration)</strong> (8 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_work_queues` | List work queues (shared to-do lists that coordinate RPA and cloud-flow processing) with status and retry/requeue policy. |
-| `get_work_queue` | Get one work queue's configuration and health: item counts by state (queued/processing/processed/on-hold/error). |
-| `create_work_queue` | Create a work queue. Optionally enforce a JSON schema on item inputs and set retry/requeue caps and a default item time-to-live. |
-| `enqueue_work_queue_item` | Add an item to a work queue for processing. Supports priority (1 = highest), delayed availability, expiry, and a per-queue dedup key. |
-| `list_work_queue_items` | List a work queue's items (newest first), optionally filtered by state: queued, processing, processed, on_hold, or error. |
-| `dequeue_work_queue_item` | Atomically claim the next queued item (oldest first, honoring priority) — it flips to Processing and is returned with its input. Finish it with update_work_queue_item. |
-| `update_work_queue_item` | Finish a claimed work-queue item: mark it processed, fail it with an exception class (business/IT/generic), or requeue it (optionally delayed). |
-| `delete_work_queue` | Permanently delete a work queue and its items. Requires confirm=true. |
-
-</details>
-
-<details>
-<summary><strong>Billing & AI Builder</strong> (3 tools)</summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_billing_policies` | List pay-as-you-go billing policies for the tenant. Requires admin role. |
-| `get_billing_policy` | Get details of a specific billing policy. |
-| `list_ai_models` | List AI Builder models in the environment. Shows model names, types, and status. |
-
-</details>
-<!-- TOOLS-TABLE:END -->
-
-## Privacy Policy
-
-This server runs entirely on your machine and collects nothing. It has no telemetry, no analytics, and no backend — data flows only between your computer and Microsoft's APIs, under your own signed-in account, plus a version check against npm's registry. Sign-in tokens live in your operating system's secure storage; configuration and caches live in your local config folder and are yours to delete.
-
-Full policy: **[Privacy Policy](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/PRIVACY.md)** (data collection, storage, third-party sharing, retention, contact).
-
 ## Security
 
-This server implements defense-in-depth security hardened through 3 rounds of penetration testing:
+Defense-in-depth, hardened through 3 rounds of penetration testing:
 
-- **Secure Token Storage**: DPAPI (Windows), Keychain (macOS), libsecret on Linux when available, with a 0o600 file-cache fallback when it is not
-- **SSRF Prevention**: Comprehensive private host detection covering IPv4, IPv6, IPv6-mapped/compatible IPv4, octal/hex/decimal notation, ULA, link-local ranges, domain allowlists
-- **OData Injection Protection**: Tautology detection across all comparison operators, parenthesized forms, arithmetic/function-based bypasses, Unicode NFC normalization, ASCII-only enforcement
-- **Path Traversal Prevention**: NFKC Unicode normalization, bidi control character stripping, zero-width character removal, null byte rejection, URL double-encoding defense
-- **Input Validation**: GUID validation on all IDs, field list validation, environment ID format checks, SharePoint hostname allowlist
-- **Injection Prevention**: Power Automate expression injection blocking (`@{`/`}@`), command injection prevention (`execFile` over `exec`), prototype pollution defense
-- **Error Sanitization**: Recursive sensitive key redaction (tokens, passwords, secrets), PII removal, stack trace suppression
-- **Log Redaction**: Deep wildcard Pino redaction for auth headers, tokens, API keys
-- **HTTP Transport Security**: Localhost-only binding, session-based Streamable HTTP, timing-safe API key comparison
-- **Resource Limits**: 2MB input size limit, 20-level depth limit, 50MB JSON response limit, 100MB binary download limit; Canvas source is capped at 1 MiB/file, 256 files, and 32 MiB/workspace
-- **Config Hardening**: File permissions (0o600), symlink rejection, world-readable warnings
-- **Auth Safety**: Token refresh mutex, MSAL PII filtering, MSAL verbose/trace suppression, silent-only mode in server
+- **Auth handled by the Azure CLI** — this server never sees credentials and never writes tokens to disk; tokens live in process memory only
+- **SSRF prevention** — private-host detection across IPv4/IPv6, mapped/compat forms, octal/hex notation, link-local and ULA ranges
+- **Injection protection** — OData tautology detection, Power Automate expression blocking, `execFile` over `exec`, prototype-pollution defense
+- **Input validation** — GUIDs, field lists, environment IDs, SharePoint hostname allowlist; path-traversal and Unicode-normalization defenses
+- **Sanitized output** — tokens/passwords/PII redacted from errors and logs (deep Pino redaction)
+- **Resource limits** — bounded input sizes, JSON/binary response caps, depth limits
+- **Hardened config & transport** — 0o600 config, symlink rejection, localhost-only HTTP binding with timing-safe auth
 
 ## Architecture
 
 ```
 AI Client <--stdio/http--> powerplatform-mcp-server
 (Claude, VS Code,               |
- Cursor, Gemini)                 ├── Power Automate Flow Management API
-                                 ├── Power Apps API (canvas apps)
-                                 ├── Canvas Authoring MCP preview (.pa.yaml + live Studio coauthoring)
-                                 ├── Power Platform Admin API (environments, DLP, capacity)
-                                 ├── Power Platform API (Power Pages hosting and security)
-                                 ├── Microsoft Graph API (SharePoint, OneDrive, Excel)
-                                 ├── Dataverse Web API (tables, solutions, model-driven apps, Power Pages config)
-                                 ├── PAC CLI (optional Power Pages download/upload and migration workflows)
-                                 ├── MSAL Auth (device code)
-                                 ├── SQLite Schema Cache (400+ connectors)
-                                 └── Secure Token Storage (OS keychain)
+ Cursor, Gemini)                ├── Power Automate Flow Management API
+                                ├── Power Apps API (canvas apps)
+                                ├── Canvas Authoring MCP preview (.pa.yaml + live Studio coauthoring)
+                                ├── Power Platform Admin API (environments, DLP, capacity)
+                                ├── Power Platform API (Power Pages hosting and security)
+                                ├── Microsoft Graph API (SharePoint, OneDrive, Excel)
+                                ├── Dataverse Web API (tables, solutions, model-driven apps)
+                                ├── PAC CLI (optional Power Pages workflows)
+                                ├── Azure CLI auth (az account get-access-token)
+                                └── SQLite Schema Cache (400+ connectors)
 ```
 
-### Live E2E (maintainers)
-
-A read-only drift suite (`tests-e2e/live.e2e.test.ts`) catches upstream Power Platform API changes: it builds the server, spawns the real `dist/index.js` over MCP stdio JSON-RPC, and calls the read tools (`list_environments`, `list_flows`, `get_flow`, `get_runs`, `diagnose_flow`, `get_flow_permissions`, `list_approvals`, `list_connections`, `search_connectors`, `list_solutions`, `list_model_driven_apps`, `list_powerpages_sites`, `list_powerpages_websites`) against the signed-in tenant, pinning the prose and `structuredContent` shapes. Missing optional consent is accepted only where the corresponding feature is unavailable; unexpected API drift still fails the suite. It never creates, updates, or deletes anything.
-
-- **Prerequisite:** the machine has completed `powerplatform-mcp-server --setup` (signed-in token cache).
-- **Run:** `npm run test:e2e` (builds first, sets `PA_MCP_E2E=1`; without that env var the suite skips itself). macOS/Linux env-var syntax — this is a maintainer tool, not part of `npm test` or CI.
-- The manual-dispatch `e2e.yml` workflow is scaffolding for a future self-hosted runner; GitHub-hosted runners have no token cache and fail fast with instructions.
-
-A separate **write-path suite** (`tests-e2e/write.e2e.test.ts`) exercises a disposable cloud-flow lifecycle (create → get → update → toggle start → run → inspect runs → toggle stop → confirmation gate → delete → verify gone). It uses the `E2E-DISPOSABLE` prefix, sweeps leftovers from interrupted runs, and performs `afterAll` cleanup.
-
-- **Run:** `npm run test:e2e:write` — double-gated (`PA_MCP_E2E=1` **and** `PA_MCP_E2E_WRITE=1`), so the read-only suite's flag alone can never mutate the tenant.
-
-The same file also contains a disposable model-driven AppModule lifecycle (create draft → validate → publish → update → read roles → confirmation gate → delete → verify gone). Because safe cleanup requires Dataverse **Delete** privilege on the Model-driven App table, it has a separate third gate and does not run as part of the ordinary write suite.
-
-- **Run:** `npm run test:e2e:model-write` only with a System Administrator/System Customizer-equivalent account that can delete model-driven apps (`PA_MCP_E2E_MODEL_WRITE=1`).
-
-The no-tenant Canvas contract suite launches the pinned official Microsoft NuGet package and verifies the MCP handshake plus the nine allowlisted authoring schemas. It never calls `connect`, opens auth, or changes a tenant.
-
-- **Prerequisite:** .NET SDK 10+ with `dnx` on `PATH`.
-- **Run:** `npm run test:e2e:canvas-contract` (explicitly gates the test with `PA_MCP_E2E_CANVAS_CONTRACT=1`).
-
-A true live Canvas round trip additionally needs a dedicated disposable app already open in Studio with coauthoring enabled. Runtime/package, consent, licensing/role, missing app/environment, inactive Studio session, YAML validation, and unknown write outcomes are distinct failures; an unconfigured tenant is never reported as a product regression.
+![Architecture](images/architecture.svg)
 
 ## License
 
 MIT
 
-## A Note of Thanks
-
-Thank you for using this project — it is truly appreciated. Every install, bug report, and suggestion makes this a better tool, and I'm committed to fixing any issue that arises so we have the best Power Automate MCP server possible. If something isn't working for you, please open an issue. I read every one, and a solid reproduction gets a fast fix.
-
 ## Support
 
-For issues and feature requests, please [open an issue](https://github.com/rcb0727/powerplatform-mcp-server/issues) in this repository. Upgrading? See [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating) and the [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md).
+For issues and feature requests, [open an issue](https://github.com/rcb0727/powerplatform-mcp-server/issues) — every one gets read, and a solid reproduction gets a fast fix. Upgrading? See [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating) and the [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md).

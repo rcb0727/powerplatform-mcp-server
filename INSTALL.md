@@ -254,3 +254,41 @@ If your tenant requires admin consent for all applications:
 3. Re-run `powerplatform-mcp-server --setup` to authenticate.
 
 Skipped feature scopes are recorded in `features.enabled`; their tools are hidden and their auth checks are skipped. Without the PowerApps Service permission, connector and Power Apps tools are unavailable. Without the BAP Admin API permission, admin tools and Dataverse URL auto-discovery are unavailable.
+
+## CLI reference
+
+
+
+## Reducing approval prompts
+
+216 tools means a lot of permission prompts if you approve each one. The
+annotations this server ships let you allow the safe ones and keep the gate
+where it matters — **100 tools are read-only, 39 are destructive, 77 are
+ordinary writes.**
+
+Allow the reads, keep prompts for everything that changes state:
+
+```jsonc
+// .claude/settings.json
+{
+  "permissions": {
+    "allow": [
+      "mcp__powerplatform__list_flows",
+      "mcp__powerplatform__get_flow",
+      "mcp__powerplatform__get_runs",
+      "mcp__powerplatform__diagnose_flow",
+      "mcp__powerplatform__query_dataverse_rows",
+      "mcp__powerplatform__list_connections",
+      "mcp__powerplatform__test_connection"
+    ]
+  }
+}
+```
+
+Add whichever other `list_*` / `get_*` / `search_*` / `diagnose_*` tools you use
+often — every one of them is annotated `readOnlyHint: true` and cannot change
+anything.
+
+Allowing the whole server (`"mcp__powerplatform"`) also works, but it
+auto-approves `delete_flow`, `reset_environment`, and 37 other irreversible
+operations. Don't, unless you are working in a throwaway environment.
