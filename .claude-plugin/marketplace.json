@@ -1,0 +1,17 @@
+{
+  "name": "powerplatform-mcp-server",
+  "owner": {
+    "name": "rcb0727",
+    "url": "https://github.com/rcb0727/powerplatform-mcp-server"
+  },
+  "metadata": {
+    "description": "Power Platform from your AI client with Azure CLI auth - 216 tools across Power Automate, Dataverse, SharePoint, Power Apps, Power Pages, desktop flows (RPA), and tenant governance. No app registration required.",
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "powerplatform-mcp-server",
+      "source": "./plugin"
+    }
+  ]
+}
