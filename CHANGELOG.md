@@ -4,6 +4,18 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.0.3] - 2026-07-29
+
+- **License changed from MIT to the Free for the People License 1.0.** Free to use, study, modify, and share — it just stays free: no selling or monetizing the software or forks of it, and every shared copy carries the same terms. Versions 1.0.2 and earlier remain MIT.
+
+## [1.0.2] - 2026-07-28
+
+- Readable npm landing page; the full 216-tool reference generates into TOOLS.md.
+
+## [1.0.1] - 2026-07-28
+
+- MCP server key renamed to `powerplatform` — side-by-side installs with powerautomate-mcp no longer collide.
+
 ## [1.0.0] - 2026-07-28
 
 First release of **powerplatform-mcp-server** — all 216 Power Platform tools, authenticated entirely through the Azure CLI. Derived from `powerautomate-mcp` 0.16.2; version history below this entry is inherited from that lineage.
