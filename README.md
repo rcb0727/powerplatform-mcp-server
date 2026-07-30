@@ -121,7 +121,7 @@ AI Client <--stdio/http--> powerplatform-mcp-server
 
 ## License
 
-[Free for the People License 1.0](LICENSE) — free to use, study, modify, and share, including at work. One rule: it stays free. Selling or monetizing the software (or forks of it) is not permitted, and every copy carries the same terms. Versions published before this change remain MIT.
+[Community License 1.0](LICENSE) — free to use, study, modify, and share, including at work. One rule: it stays free. Selling or monetizing the software (or forks of it) is not permitted, and every copy carries the same terms. Versions published before this change remain MIT.
 
 ## Support
 

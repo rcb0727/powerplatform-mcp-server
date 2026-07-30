@@ -6,7 +6,7 @@
 
 ## [1.0.3] - 2026-07-29
 
-- **License changed from MIT to the Free for the People License 1.0.** Free to use, study, modify, and share — it just stays free: no selling or monetizing the software or forks of it, and every shared copy carries the same terms. Versions 1.0.2 and earlier remain MIT.
+- **License changed from MIT to the Community License 1.0.** Free to use, study, modify, and share — it just stays free: no selling or monetizing the software or forks of it, and every shared copy carries the same terms. Versions 1.0.2 and earlier remain MIT.
 
 ## [1.0.2] - 2026-07-28
 
