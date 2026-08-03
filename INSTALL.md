@@ -58,6 +58,24 @@ npm install -g powerplatform-mcp-server
 
 See the [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) for what's new and any version-specific upgrade notes.
 
+## Rolling back
+
+Every published version stays on npm permanently, so if an upgrade misbehaves you can return to the version you were on with one command. Same rule as updating: quit your AI clients first.
+
+1. Pick the version: the [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) lists every release and what changed, or run `npm view powerplatform-mcp-server versions`.
+2. Install it by number:
+   ```bash
+   npm install -g powerplatform-mcp-server@1.0.2
+   ```
+3. Verify, then relaunch your AI client:
+   ```bash
+   powerplatform-mcp-server --version
+   ```
+
+A rollback changes only the installed package — your configuration and Azure CLI sign-in are untouched, and there's nothing else to undo (no service, no database, no migrations). When the issue is resolved, `npm install -g powerplatform-mcp-server@latest` moves you forward again.
+
+**Organizations:** deployment scripts can pin an exact version (`@1.0.2` instead of `@latest`) so every machine runs the version IT approved — rolling back then means pushing the deployment again with the prior pin. If a release forced you to roll back, please [report it](https://github.com/rcb0727/powerplatform-mcp-server/issues) so it gets fixed for everyone.
+
 ## First-Time Setup
 
 ```bash
