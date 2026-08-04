@@ -275,13 +275,29 @@ Skipped feature scopes are recorded in `features.enabled`; their tools are hidde
 
 ## CLI reference
 
+| Flag | Description |
+|------|-------------|
+| `--setup`, `-s` | Run the interactive setup wizard (az sign-in + environment + AI-app wiring) |
+| `--login` | Sign in again using your existing setup — wraps `az login`, no wizard |
+| `--doctor` | Check your setup and print exactly what to fix, then exit |
+| `--validate` | Verify config, auth, and API connectivity then exit |
+| `--client <name>` | Wire an AI app's config to this server, then exit (`claude`, `claude-code`, `codex`, `cursor`, `vscode`, `gemini`, `windsurf`) |
+| `--npx` | With `--setup`/`--client`, configure the app to run via `npx` (no global install) |
+| `--update` | Check for updates and install the latest version |
+| `--version`, `-v` | Print version and exit |
+| `--http` | Start with Streamable HTTP transport (for ChatGPT / remote clients) |
+| `--port <N>` | Port for HTTP transport (default: 3000) |
+| `--env <name>` | Override the default environment (alias or GUID) |
+| `--config <path>` | Use an alternate config file |
+| `--debug` | Enable debug-level logging |
+| `--help`, `-h` | Show this help message |
 
 
 ## Reducing approval prompts
 
-216 tools means a lot of permission prompts if you approve each one. The
+227 tools means a lot of permission prompts if you approve each one. The
 annotations this server ships let you allow the safe ones and keep the gate
-where it matters — **100 tools are read-only, 39 are destructive, 77 are
+where it matters — **104 tools are read-only, 41 are destructive, 82 are
 ordinary writes.**
 
 Allow the reads, keep prompts for everything that changes state:

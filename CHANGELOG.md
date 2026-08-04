@@ -4,17 +4,28 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.0.4] - 2026-08-04
+
+- **Dataverse depth: 216 → 227 tools.** Eleven new tools close the gaps between "CRUD on rows" and "work with Dataverse like it's a real database":
+  - **`execute_fetchxml`** — aggregates, grouping, and link-entity joins that OData can't express ("opportunities closed above $50k this quarter, grouped by owner").
+  - **`get_dataverse_option_set` / `get_dataverse_relationships`** — the anti-hallucination pair: choice columns' label↔integer mappings and relationship schema names are the two things an AI cannot guess, and guessing them wrong writes bad data silently or 404s.
+  - **`create_dataverse_column` / `create_dataverse_lookup_column`** — schema write (string, memo, integer, decimal, money, datetime, boolean, picklist; lookups create the N:1 relationship in the same call). Confirm-gated; reminds you to publish.
+  - **`batch_dataverse_operations`** — up to 100 operations in one `$batch`, with optional all-or-nothing changesets; batches containing deletes are confirm-gated. The right tool for "add every approved row from this spreadsheet."
+  - **`upsert_dataverse_row`** (alternate-key create-or-update, reports which happened), **`assign_dataverse_row`** (ownership to a user or team), **`associate_dataverse_rows` / `disassociate_dataverse_rows`** (N:N and 1:N links), **`search_dataverse`** (full-text relevance search across tables).
+- **Auth errors now name the real cause.** When Microsoft refuses to renew the Azure CLI's session, the error says why instead of a blanket "not signed in": your organization's sign-in frequency policy expired the session on schedule (recurring by design — not a bug), the sign-in was revoked by a password change or security event, it expired after 90 days without use, or Conditional Access is blocking the device/network outright (that one points at IT, since signing in again won't fix it).
+- **Dataverse errors now carry a category** — `[PERMISSIONS]`, `[SCHEMA_MISMATCH]`, or `[ENV_LIMITATION]` — so the AI knows whether to fix a name, ask an admin, or stop retrying something the environment has disabled, instead of hammering an unwinnable call.
+
 ## [1.0.3] - 2026-07-29
 
-- **License changed from MIT to the Community License 1.0.** Free to use, study, modify, and share — it just stays free: no selling or monetizing the software or forks of it, and every shared copy carries the same terms. Versions 1.0.2 and earlier remain MIT.
+- **License: MIT → Community License 1.0.** Free to use, study, modify, and share — including at work. One rule: it stays free. Selling or otherwise monetizing the software, or any fork of it, is not permitted, and every shared copy carries the same terms. Versions published before this change remain MIT.
 
 ## [1.0.2] - 2026-07-28
 
-- Readable npm landing page; the full 216-tool reference generates into TOOLS.md.
+- **The npm page is readable now.** The package README is the streamlined landing page (pitch, install, Azure CLI auth, capability grid, security, architecture) instead of the 700-line wall; the full 216-tool reference generates into `TOOLS.md` (shipped in the package and on [GitHub](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/TOOLS.md)). `docs:tools`/`docs:check` now maintain the README grid, TOOLS.md, and CLAUDE.md together, so none of them can drift.
 
 ## [1.0.1] - 2026-07-28
 
-- MCP server key renamed to `powerplatform` — side-by-side installs with powerautomate-mcp no longer collide.
+- **MCP server key renamed to `powerplatform`.** Client configs written by `--setup`/`--client` and tool prefixes (`mcp__powerplatform__*`) now match the package identity, and a side-by-side install with `powerautomate-mcp` no longer collides on the server key. If you installed 1.0.0, re-run `powerplatform-mcp-server --client <your app>` to update the entry.
 
 ## [1.0.0] - 2026-07-28
 

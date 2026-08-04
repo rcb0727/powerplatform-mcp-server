@@ -1,7 +1,7 @@
 {
   "name": "powerplatform-mcp-server",
   "description": "Power Platform from your AI client: build and debug flows, manage connections, run desktop flows (RPA) and work queues, administer Dataverse, Power Pages, and tenant governance.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": {
     "name": "rcb0727"
   },
