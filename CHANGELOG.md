@@ -4,7 +4,11 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
-## [1.0.5] - 2026-08-05
+## [Unreleased]
+
+- **`--setup --client skip` works as documented.** The wizard always supported "skip" as a pre-selected answer for the AI-app step, but the CLI rejected the word as an unknown client and showed the menu anyway. Scripted and unattended setups can now skip client wiring cleanly.
+
+## [1.0.5] - 2026-08-06
 
 - **You'll hear about new versions in the chat.** When a newer release is on npm, the first tool response of a session carries a one-line note — current version, new version, and the exact update command for how you installed it — then the session stays quiet. `PA_MCP_UPDATE_NOTICE=0` turns it off. The check is the existing non-blocking startup check; no tool call ever waits on the npm registry.
 - **Switch environments without leaving the chat — `switch_environment` (227 → 228 tools).** Working across dev/test/prod no longer means re-running `--setup`: ask to switch by environment name or ID (see `list_environments`) and the session re-points every tool — including Dataverse, whose per-environment org URL is re-resolved automatically. The switch is **session-only by design**: nothing is written to your configuration, restarting the server returns to your default, and access is always limited to what your Azure CLI account already has in the target environment. While switched, every destructive tool's output names the active environment, so "delete that flow" can never quietly land in the wrong place.
