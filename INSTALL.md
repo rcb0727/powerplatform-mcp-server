@@ -56,6 +56,8 @@ npm install -g powerplatform-mcp-server
 
 `powerplatform-mcp-server --update` does the npm upgrade for you — the same rule applies: close clients first.
 
+You don't have to check for updates yourself: when a new version is out, the server mentions it once per session right in the chat (set `PA_MCP_UPDATE_NOTICE=0` to turn that off).
+
 See the [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) for what's new and any version-specific upgrade notes.
 
 ## Rolling back
@@ -295,9 +297,9 @@ Skipped feature scopes are recorded in `features.enabled`; their tools are hidde
 
 ## Reducing approval prompts
 
-227 tools means a lot of permission prompts if you approve each one. The
+228 tools means a lot of permission prompts if you approve each one. The
 annotations this server ships let you allow the safe ones and keep the gate
-where it matters — **104 tools are read-only, 41 are destructive, 82 are
+where it matters — **104 tools are read-only, 41 are destructive, 83 are
 ordinary writes.**
 
 Allow the reads, keep prompts for everything that changes state:

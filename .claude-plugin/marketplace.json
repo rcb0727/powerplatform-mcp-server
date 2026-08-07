@@ -5,7 +5,7 @@
     "url": "https://github.com/rcb0727/powerplatform-mcp-server"
   },
   "metadata": {
-    "description": "Power Platform from your AI client with Azure CLI auth - 227 tools across Power Automate, Dataverse, SharePoint, Power Apps, Power Pages, desktop flows (RPA), and tenant governance. No app registration required.",
+    "description": "Power Platform from your AI client with Azure CLI auth - 228 tools across Power Automate, Dataverse, SharePoint, Power Apps, Power Pages, desktop flows (RPA), and tenant governance. No app registration required.",
     "pluginRoot": "."
   },
   "plugins": [
