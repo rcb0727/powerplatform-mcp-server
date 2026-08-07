@@ -4,6 +4,12 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.0.6] - 2026-08-07
+
+- **Power Pages permission errors now tell the truth.** The management API reports a missing user role as a 401 with "User doesn't have required permissions" (D004) — the tools used to swallow that body and say "Authentication failed," pointing at sign-in when the real fix is an environment admin granting a Power Pages role. The error now names the actual problem and the fix.
+- **"InvalidApiVersion" now says what it almost always means: your install is outdated.** When Microsoft rejects a call over a retired API version, the error names your installed version and gives the exact update command, instead of reading like a product bug.
+- **`--setup --client skip` works as documented.** The wizard always supported "skip" as a pre-selected answer for the AI-app step, but the CLI rejected the word as an unknown client and showed the menu anyway. Scripted and unattended setups can now skip client wiring cleanly.
+
 ## [1.0.5] - 2026-08-06
 
 - **You'll hear about new versions in the chat.** When a newer release is on npm, the first tool response of a session carries a one-line note — current version, new version, and the exact update command for how you installed it — then the session stays quiet. `PA_MCP_UPDATE_NOTICE=0` turns it off. The check is the existing non-blocking startup check; no tool call ever waits on the npm registry.
