@@ -4,6 +4,11 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.0.7] - 2026-08-07
+
+- **Bug fix — Power Pages provisioning no longer reports false failures.** The service's `Operation-Location` header carries no `api-version`, and Microsoft now rejects unversioned polls — so `create_powerpages_website` provisioned the site successfully and then reported `ApiVersionInvalid` anyway (field report: three "failed" attempts, one live site). The poller now appends the API version (and honors one if the service ever includes it).
+- **Bug fix — site and component tools survive broken `mspp_*` virtual tables.** On some tenants, Power Pages' enhanced-model virtual tables throw `Value cannot be null: entityMetadata` on retrieve-by-key — which used to kill `get_powerpages_site`, `list_powerpages_components`, and `create_powerpages_component` unconditionally, on every site. Model detection and site reads now use filtered queries (the operation those tables handle reliably — the same one `list_powerpages_sites` was already succeeding with), structural provider errors fall through to the standard model instead of aborting, and when a site truly can't be found the error says the virtual provider misbehaved rather than pretending the site doesn't exist.
+
 ## [1.0.6] - 2026-08-07
 
 - **Power Pages permission errors now tell the truth.** The management API reports a missing user role as a 401 with "User doesn't have required permissions" (D004) — the tools used to swallow that body and say "Authentication failed," pointing at sign-in when the real fix is an environment admin granting a Power Pages role. The error now names the actual problem and the fix.
