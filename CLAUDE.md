@@ -593,21 +593,6 @@ reason a build stalls halfway.
 5. Use trigger conditions to filter high-volume triggers
 
 
-## Release process rules
-
-**Three things are duplicated into the docs repo and must be synced at every
-release** — each has silently stranded at least once:
-1. `skills/` → docs repo `plugin/skills/`
-2. `CLAUDE.md` (scrub the release-process and MCPB sections first)
-3. README tool tables and counts
-
-**MCPB bundles must not be published** while the extension-directory
-submission is pending. `mcpb.yml` triggers on release creation, so cancel the
-run and delete any attached asset until the workflow is disabled or the hold
-lifts.
-
-Run a `grep -ri mcpb` over the public repo before every push.
-
 ## Live-validation lessons (do not relearn these)
 
 Doc-derived code against Microsoft APIs has a meaningful defect rate. Every
