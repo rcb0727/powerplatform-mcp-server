@@ -593,6 +593,7 @@ reason a build stalls halfway.
 5. Use trigger conditions to filter high-volume triggers
 
 
+
 ## Live-validation lessons (do not relearn these)
 
 Doc-derived code against Microsoft APIs has a meaningful defect rate. Every
