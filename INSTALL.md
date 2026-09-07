@@ -257,23 +257,28 @@ This starts a Streamable HTTP server on `POST /mcp` compatible with any MCP clie
 
 ## Enterprise Tenants with Strict Consent Policies
 
-If your tenant requires admin consent for all applications:
+This package uses Microsoft's Azure CLI client; it does not create or manage an
+app registration. If your tenant restricts that client, an Entra administrator
+must review **Microsoft Azure CLI** in Enterprise applications, its sign-in logs,
+and the applicable Conditional Access policies. Re-running setup cannot add API
+permissions or grant consent to Microsoft's client.
 
-1. **Add only the API permissions for the feature set you selected** in Microsoft Entra:
-   - Flow Service (`7df0a125-d3be-4c96-aa54-591f83ff541c`): `Flows.Read.All`, `Flows.Manage.All`, `Activity.Read.All`, `Approvals.Manage.All`
-   - Optional SharePoint/Excel helpers: Microsoft Graph `User.Read`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`
-   - Optional connections/connectors/Power Apps: PowerApps Service (`475226c6-020e-4fb2-8a90-7a972cbfc1d4`) `User`
-   - Optional Dataverse/admin/Power Pages config: BAP Admin API (`0e0bf3cc-3078-4fd4-9ef3-cb6dc0245b10`) `user_impersonation`
-   - Optional Dataverse/Power Pages config: Dynamics CRM (`00000007-0000-0000-c000-000000000000`) `user_impersonation`
+A missing user role is a separate issue. Copilot tenant inventory needs a
+supported inventory role such as **AI Reader** or **Global Reader**; Dataverse
+authoring needs access to the environment and the relevant rows. A generic 403
+does not distinguish a missing client permission from a missing user role.
+The service response determines whether the Azure CLI session can use an API;
+an absent scope claim alone is not a reliable capability check.
 
-2. **Grant admin consent** for the selected permissions via:
-   ```
-   https://login.microsoftonline.com/{tenant-id}/adminconsent?client_id={your-client-id}
-   ```
+The app-registration sibling, [powerautomate-mcp](https://github.com/rcb0727/powerautomate-mcp),
+supports explicitly consented permissions for authenticated Copilot execution,
+maker evaluations, and administrator governance. Those surfaces are not exposed
+by this Azure CLI package. After an expired-session error, use `sign_in` or
+`powerplatform-mcp-server --login`; after a permission or role error, resolve the
+named authorization requirement first.
 
-3. Re-run `powerplatform-mcp-server --setup` to authenticate.
-
-Skipped feature scopes are recorded in `features.enabled`; their tools are hidden and their auth checks are skipped. Without the PowerApps Service permission, connector and Power Apps tools are unavailable. Without the BAP Admin API permission, admin tools and Dataverse URL auto-discovery are unavailable.
+`features.enabled` controls which tools are exposed. Enabling a feature does not
+grant permissions, change tenant policy, or give the signed-in user a new role.
 
 ## CLI reference
 
@@ -297,9 +302,9 @@ Skipped feature scopes are recorded in `features.enabled`; their tools are hidde
 
 ## Reducing approval prompts
 
-228 tools means a lot of permission prompts if you approve each one. The
+274 tools means a lot of permission prompts if you approve each one. The
 annotations this server ships let you allow the safe ones and keep the gate
-where it matters — **104 tools are read-only, 41 are destructive, 83 are
+where it matters — **132 tools are read-only, 44 are destructive, 107 are
 ordinary writes.**
 
 Allow the reads, keep prompts for everything that changes state:
