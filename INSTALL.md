@@ -1,5 +1,8 @@
 # Installation Guide
 
+For large tool catalogs, see [Token-efficient client setup](docs/TOKEN-EFFICIENCY.md).
+All tools remain available; supported clients discover full schemas on demand.
+
 **Docs:** [Overview](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/README.md) · **Installation & Upgrading** · [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) · [Report an issue](https://github.com/rcb0727/powerplatform-mcp-server/issues)
 
 This MCP server uses the **stdio** transport and works with any MCP-compatible AI client.
