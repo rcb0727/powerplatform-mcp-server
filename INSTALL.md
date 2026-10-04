@@ -305,9 +305,9 @@ grant permissions, change tenant policy, or give the signed-in user a new role.
 
 ## Reducing approval prompts
 
-274 tools means a lot of permission prompts if you approve each one. The
+302 tools means a lot of permission prompts if you approve each one. The
 annotations this server ships let you allow the safe ones and keep the gate
-where it matters — **132 tools are read-only, 44 are destructive, 107 are
+where it matters: **138 tools are read-only, 53 are destructive, 111 are
 ordinary writes.**
 
 Allow the reads, keep prompts for everything that changes state:
