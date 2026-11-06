@@ -4,6 +4,14 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.10.7] - 2026-11-05
+
+- **The `@hono/node-server` advisory Snyk reported is closed (GHSA-rmxm-3fg6-px4f, SNYK-JS-HONONODESERVER-21802762).** Before 2.1.3, a percent-encoded traversal sequence such as `%2e%2e` in a request path could make its `serveStatic` middleware read files outside the static root. It was never reachable here: the MCP SDK's Streamable HTTP transport imports only `getRequestListener` from the package, and nothing loads `serveStatic`. The `@hono/node-server` floor in `overrides` rises from `^2.0.5` to `^2.1.3`, and the lockfile moves from 2.0.11 to 2.1.5, the current release. Installs from npm already resolved a fixed version, because the package ships no lockfile and the SDK accepts any 2.x from 2.0.5.
+
+- **The build and lint toolchain advisories Snyk reported are closed. Development only: nothing in the published package changes.** `tsup` moves from 8.5.1 to 9.0.0, and a new `esbuild` floor of `^0.28.1` in `overrides` replaces esbuild 0.27.2 with 0.28.2 everywhere it was installed (SNYK-JS-ESBUILD-17750822, GHSA-gv7w-rqvm-qjhr; GitHub has since withdrawn the advisory, which concerns esbuild's Deno module). `rimraf` 6.1.4 brings `glob` 14.0.3 (CVE-2026-118773, GHSA-3g3m-2fjr-6pw4), and a `minimatch` floor of `^11.0.1` closes CVE-2026-118764 (GHSA-g3hv-75wg-m249) under eslint, which still asks for 10.x; eslint's output is unchanged. tsup 9 bundles with esbuild 0.28, which emits class field declarations the way the ES2022 target already type-checks them, so the built server is otherwise identical. `uri-js` 4.4.1, which eslint reaches through ajv 6 (CVE-2026-93690, CVE-2026-93751, CVE-2026-103387), has no fixed release; eslint uses it only to validate rule options from this repo's own lint configuration.
+
+- **Development tooling updates from Dependabot's minor-and-patch group. Development only: nothing in the published package changes.** eslint 10.14.0, typescript-eslint 8.72.1, vitest and `@vitest/coverage-v8` 5.1.0 (updated together, since the coverage plugin requires the same vitest version) and `@types/node` 26.6.6, with vite 8.3.5 and rolldown 1.2.16 underneath vitest. eslint's output is unchanged, and the `minimatch` and `esbuild` security floors still hold.
+
 ## [1.10.6] - 2026-10-28
 
 - **Test tooling moves to vitest 5.** `vitest` and `@vitest/coverage-v8` move to 5.0.5 together. The coverage plugin requires exactly the same vitest version, so Dependabot's separate pull requests for each could never install, and Dependabot now updates the two in one pull request. The full suite and the coverage thresholds pass unchanged. Development only: nothing in the published package changes.
