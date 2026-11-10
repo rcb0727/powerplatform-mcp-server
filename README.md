@@ -69,7 +69,7 @@ That's the entire auth story. If a tool ever reports missing credentials, the fi
 |---|---|---|
 | **Setup & Authentication** (1) | **Core Flow Operations** (15) | **Testing & Debugging** (10) |
 | **Planning & Help** (5) | **Connections & Custom Connectors** (15) | **Approvals** (3) |
-| **Dataverse CRUD** (7) | **Dataverse Depth (queries, metadata, schema, bulk)** (11) | **SharePoint** (11) |
+| **Dataverse CRUD** (7) | **Dataverse Depth (queries, metadata, schema, bulk)** (11) | **SharePoint** (12) |
 | **Excel (OneDrive)** (2) | **Power Apps** (12) | **Canvas App Authoring (Preview)** (13) |
 | **Model-driven Apps** (13) | **Power Apps Administration** (4) | **Power Pages — Site Configuration** (9) |
 | **Power Pages — Site Management** (36) | **Power Pages — PAC CLI** (8) | **Environment Administration** (11) |
@@ -91,6 +91,12 @@ Beyond the tool count:
 - **Sign in from the chat** — the `sign_in` tool completes Microsoft device-code auth without a terminal; every action runs under your own work account
 - **Everything annotated** — all 304 tools declare read-only/destructive hints, so AI hosts can apply the right guardrails
 - **Cross-platform** — Windows, macOS, and Linux
+
+### Canvas source authoring (preview)
+
+Canvas source authoring uses Microsoft's official prerelease Canvas Authoring MCP as an isolated child process. Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), open an existing blank or editable canvas app in Power Apps Studio, enable **Settings → Updates → Coauthoring**, and keep that Studio tab open. Then call `connect_canvas_authoring` with the Studio Designer URL before using discovery, sync, or compile tools.
+
+The assistant edits `App.pa.yaml` and one `.pa.yaml` file per screen using live control, API and data-source metadata. Connection setup does not verify a live coauthoring session. Confirmed `sync_canvas_source` stages and validates the returned files, including verified `_EditorState.pa.yaml` metadata, before guarded local replacements. A failure reports any partial local writes. Confirmed `compile_canvas_source` targets the live Studio draft; it does not verify a dirty flag or persistence. Verify the draft and use native **Save** in Studio before calling `publish_powerapp`. Publication acceptance and independent version readback are reported separately, with no automatic retry after an ambiguous write. Version timestamps come from validated service `appVersion` values. The authoring preview requires an existing cloud app shell and Studio data connections. See Microsoft's [external-tools preview guide](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/create-canvas-external-tools) and [Power Apps YAML reference](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/power-apps-yaml).
 
 ## Security
 
