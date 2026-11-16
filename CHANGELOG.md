@@ -4,6 +4,43 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.10.9] - 2026-11-16
+
+- Updated `better-sqlite3` to 13.2.0, plus development tooling (eslint 10.15.0, prettier 3.10.1, typescript-eslint 8.72.2). No change to tools or behaviour.
+
+- **Run payloads reach the model whole more often: `get_run_actions`, `get_run_action_repetitions` and `get_trigger_inputs` now return them as compact JSON.** Action inputs and outputs are cut at 1,000 characters and trigger payloads at 12,000, and they were pretty-printed before the cut, so indentation and line breaks used a large share of each budget and nested payloads were cut off well before their data ran out. On a real Sandbox run with 67 inputs and outputs, the number cut off fell from 18 to 6 and the reply text shrank by 20 percent. The limits, the fields shown and the "…" marker are unchanged; only whitespace goes. An untruncated trigger payload remains valid JSON, now on one line, so it can be passed to `test_flow` as before. A circular or otherwise unserializable payload now reads "[unserializable value]" instead of failing the call.
+
+### Added
+
+- **AI Builder prompts can be inspected, versioned and tested through native operations.** Four tools provide identity-bound inspection, guarded version publishing, explicit copies and native prompt execution with source readback. Existing model identities, input bindings and model settings are preserved during version saves. Writes and tests preview by default and require confirmation. Context growth checks include the new prompt workflow.
+
+### Changed
+
+- **Context growth is checked before changes can ship.** Reviewed budgets cover the complete tool catalog, startup guidance, individual definitions and eight representative task selections. Measurements retain full schemas and safety annotations and report UTF-8 bytes. Development tooling and client guidance only: tool availability, authentication and runtime behavior are unchanged.
+
+### Fixed
+
+- **Seven `hono` and `@hono/node-server` advisories are closed by raising the existing `overrides` floors.** `hono` 4.13.13 to 4.13.18 clears GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-46wx-v44x-9hh2, GHSA-4h7h-rv7c-7m2v and GHSA-3gg2-335m-rxc6 (middleware bypasses through `mount()` and RegExpRouter, `csrf()` with `text/ping`, `validator('form')` with multipart extras, and the `css` helper). `@hono/node-server` 2.1.5 to 2.1.8 clears GHSA-qv5m-9pm6-hqp3 (an unhandled `ECONNRESET` during a WebSocket upgrade) and GHSA-jpvv-r467-5p4w (a backslash read as a path separator). Both arrive through the MCP SDK's Streamable HTTP transport. The floors move from `^4.13.11` to `^4.13.16` and from `^2.1.3` to `^2.1.6`; the SDK already accepts these versions, so the remedy is a relock.
+
+- **A rate limiting advisory in a package the MCP SDK installs is closed with a new `overrides` floor.** `express-rate-limit` 8.5.0 to 8.7.4 clears GHSA-j3cq-92fq-qg5f (CVE-2026-126204). Only the MCP SDK's OAuth server handlers (authorize, token, register, revoke) load it, and this server imports none of them, so the code was never reachable here. The floor is `^8.7.2`; the SDK asks for `^8.2.1`, so the remedy is a relock.
+
+- Flow payload normalization evaluates nested standalone WDL expressions instead of freezing their source as text. JSON value types are preserved, Response bodies remain object-valued, and existing whole-body expressions are retained.
+
+- Flow planning honors explicit Request/Skills agent triggers and common connector exclusions. Review alone no longer requests the Approvals connector, and agent chat context alone no longer asks for a Teams post.
+- Connection creation uses the singular connectionParametersSet write contract with wrapped values, preserving a selected authentication mode. A rejected named mode is reported without retrying as an untyped connection.
+
+- **The README, the install guide, the bundle manifest and the package description give the right tool count, 309.** 1.10.8 added `get_sharepoint_library_drive` while they still said 304, and the four AI Builder prompt tools bring the count to 309; the install guide now counts 142 read-only tools. Documentation only for this entry: no tool changes.
+
+- Copilot tool inventory includes explicit active, inactive and unknown component states with counts for the returned rows. Inactive tools remain listed, continuation and publication warnings remain visible, and state metadata is not reported as execution availability.
+
+- Copilot activity diagnostics explicitly label recorded Studio history and unknown recording delay. Valid timestamps are not proof that the latest chat message was captured, and ownership failures continue to return no rows.
+
+- **Copilot Studio tools warn before the monthly credit allowance runs out.** Testing, evaluating and publishing agents (`chat_with_copilot_agent`, `start_copilot_agent_evaluation`, `publish_copilot_agent`) add a `usageWarning` line once the tenant has used 80% of its Copilot Studio credits, an urgent one at 95%, and one whenever capacity status is not WithinCapacity. The line gives the date of the usage figure, which Microsoft reports several days late, and says when no pay-as-you-go billing is set up. The usage read is cached for an hour and runs alongside the tool, so it never slows a call; if it fails or is refused, nothing is added. Set the thresholds with the environment variables `PA_MCP_COPILOT_CREDIT_WARNING_PERCENT` and `PA_MCP_COPILOT_CREDIT_URGENT_PERCENT`, or turn it off with `PA_MCP_COPILOT_CREDIT_WARNING=off`.
+
+- `get_copilot_credit_usage` no longer says it needs an administrator role. A signed-in user without one reads the tenant's credit usage (verified live).
+
+- Power App access reads use the maker permissions endpoint with the app's environment. Ownership is shown separately from sharing counts, and malformed permission responses remain errors.
+
 ## [1.10.8] - 2026-11-09
 
 ### Fixed
