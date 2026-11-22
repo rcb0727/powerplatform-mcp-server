@@ -4,6 +4,12 @@
 
 > **Upgrading?** Quit your AI clients first so no `powerplatform-mcp-server` process is running, then `npm install -g powerplatform-mcp-server@latest`. Details: [Updating safely](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/INSTALL.md#updating).
 
+## [1.10.10] - 2026-11-22
+
+- Compact is the default catalog: 282 tools cover all 309 operations by grouping 49 related reads into 22 tools. Every operation field is visible at the schema root while per-operation requirements, defaults and bounds remain validated. Existing handlers, permissions, responses and errors are preserved. Select `PA_MCP_TOOL_CATALOG=legacy` for saved legacy bindings. Context checks cover both profiles and cap the default catalog below 300 tools.
+
+- The architecture image shows the default catalog count, 282.
+
 ## [1.10.9] - 2026-11-16
 
 - Updated `better-sqlite3` to 13.2.0, plus development tooling (eslint 10.15.0, prettier 3.10.1, typescript-eslint 8.72.2). No change to tools or behaviour.
