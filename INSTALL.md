@@ -2,6 +2,8 @@
 
 For large tool catalogs, see [Token-efficient client setup](docs/TOKEN-EFFICIENCY.md).
 All tools remain available; supported clients discover full schemas on demand.
+The optional [focused discovery pilot](docs/TOKEN-EFFICIENCY.md#focused-discovery-pilot)
+requires dynamic tool refresh. Compact remains the default.
 
 **Docs:** [Overview](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/README.md) · **Installation & Upgrading** · [Changelog](https://github.com/rcb0727/powerplatform-mcp-server/blob/main/CHANGELOG.md) · [Report an issue](https://github.com/rcb0727/powerplatform-mcp-server/issues)
 
@@ -92,6 +94,17 @@ This interactive wizard will:
 2. Let you choose a tool set: all tools, Power Automate only, connectors/Power Apps, Dataverse, Power Pages, or custom
 3. Discover your Power Automate environments
 4. Create the configuration file
+
+## Choose a sign-in method
+
+Setup and `--login` offer device code or browser sign-in in an interactive terminal. Select either route directly on Windows, macOS or Linux:
+
+```bash
+powerplatform-mcp-server --login --auth-method browser
+powerplatform-mcp-server --login --auth-method device-code
+```
+
+Use the same flag with `--setup`. In chat, call `sign_in` with `{"method":"browser"}` or `{"method":"device-code"}`; the default remains device code. Browser mode opens on the MCP computer, so choose device code for remote or headless hosts. Browser mode disables Azure CLI brokers for that login child process only. It preserves the Azure CLI profile and does not rewrite global CLI settings or clear other accounts. Both routes follow your organization's sign-in policies.
 
 ## Configure Your AI Client
 
@@ -288,7 +301,8 @@ grant permissions, change tenant policy, or give the signed-in user a new role.
 | Flag | Description |
 |------|-------------|
 | `--setup`, `-s` | Run the interactive setup wizard (az sign-in + environment + AI-app wiring) |
-| `--login` | Sign in again using your existing setup — wraps `az login`, no wizard |
+| `--login` | Sign in again using your existing setup, with a choice of browser or device code |
+| `--auth-method <method>` | With `--login` or `--setup`, select `browser` or `device-code` directly |
 | `--doctor` | Check your setup and print exactly what to fix, then exit |
 | `--validate` | Verify config, auth, and API connectivity then exit |
 | `--client <name>` | Wire an AI app's config to this server, then exit (`claude`, `claude-code`, `codex`, `cursor`, `vscode`, `gemini`, `windsurf`) |
@@ -305,7 +319,7 @@ grant permissions, change tenant policy, or give the signed-in user a new role.
 
 ## Reducing approval prompts
 
-309 tools means a lot of permission prompts if you approve each one. The
+284 default tools means a lot of permission prompts if you approve each one. The
 annotations this server ships let you allow the safe ones and keep the gate
 where it matters: **142 tools are read-only, 53 are destructive, 114 are
 ordinary writes.**
